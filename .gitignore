@@ -1,0 +1,12 @@
+.vscode
+.DS_Store
+.idea
+build/
+ccm
+claude-cli-manager
+.env
+.env.local
+temp.md
+temp.txt
+*.swp
+*.swo
