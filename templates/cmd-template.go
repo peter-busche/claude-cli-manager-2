@@ -3,7 +3,7 @@ package {{.PackageName}}
 import (
 	"fmt"
 
-	"github.com/peter-busche/claude-cli-manager/internal/lib"
+	"github.com/peter-busche/claude-cli-manager-2/internal/lib"
 
 	"github.com/spf13/cobra"
 )
@@ -44,7 +44,7 @@ var {{.FunctionName}}Cmd = &cobra.Command{
 	Long: `Description:
   TODO: Long description of the {{.UserFunctionName}} command
   and what it does.`,
-	Example:       `  ccm {{.PackageName}} {{.UserFunctionName}}`,
+	Example:       `  ccm2 {{.PackageName}} {{.UserFunctionName}}`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	RunE: func(cmd *cobra.Command, args []string) error {

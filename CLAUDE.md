@@ -5,9 +5,9 @@ code in this repository.
 
 ## Build and Development Commands
 
-- **Build**: `go build -o ccm .` — creates the local `ccm` executable
+- **Build**: `go build -o ccm2 .` — creates the local `ccm2` executable
 - **Run**: `go run .` — builds and runs the CLI directly
-- **Test local build**: `./ccm --version` — runs the built executable
+- **Test local build**: `./ccm2 --version` — runs the built executable
 - **Tidy deps**: `go mod tidy`
 
 ## Maintenance Scripts
@@ -36,12 +36,12 @@ This script automatically:
 ### CLI structure
 
 - Built using the [Cobra](https://github.com/spf13/cobra) framework.
-- Hierarchical commands: `ccm <object> <command> <flags>`.
+- Hierarchical commands: `ccm2 <object> <command> <flags>`.
 - Each object (e.g. `app`) is its own package under `cmd/`.
 - The root command and `Execute()` live in `cmd/root.go`.
-- The module path is `github.com/peter-busche/claude-cli-manager`; internal
+- The module path is `github.com/peter-busche/claude-cli-manager-2`; internal
   packages are imported relative to it (e.g.
-  `github.com/peter-busche/claude-cli-manager/internal/lib`).
+  `github.com/peter-busche/claude-cli-manager-2/internal/lib`).
 
 ### Command pattern
 
@@ -58,9 +58,9 @@ See `templates/cmd-template.go` and `templates/parent-cmd-template.go`.
 ### Configuration
 
 - Uses [Viper](https://github.com/spf13/viper).
-- Optional config file at `~/.config/ccm/config.yaml` (a missing file is not an
+- Optional config file at `~/.config/ccm2/config.yaml` (a missing file is not an
   error — see `initConfig` in `cmd/root.go`).
-- Environment variables prefixed with `CCM_` are read automatically.
+- Environment variables prefixed with `ccm2_` are read automatically.
 
 ### Shared helpers (`internal/lib`)
 
@@ -74,4 +74,4 @@ See `templates/cmd-template.go` and `templates/parent-cmd-template.go`.
 ### Versioning
 
 - The `VERSION` file is embedded into the binary via `//go:embed` in `main.go`
-  and surfaced through `ccm --version`. Bump it (semver) when releasing.
+  and surfaced through `ccm2 --version`. Bump it (semver) when releasing.

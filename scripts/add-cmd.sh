@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Script to generate new claude-cli-manager (ccm) commands.
+# Script to generate new claude-cli-manager-2 (ccm2) commands.
 # Usage:   bash scripts/add-cmd.sh [package_name] [action] [action_alias](optional)
 # Example: bash scripts/add-cmd.sh app list-sessions list
 
-MODULE_PATH="github.com/peter-busche/claude-cli-manager"
+MODULE_PATH="github.com/peter-busche/claude-cli-manager-2"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -155,7 +155,7 @@ $ALIAS_LINE
 	Long: \`Description:
   TODO: Long description of the $USER_FUNCTION_NAME command
   and what it does.\`,
-	Example:       \`  ccm $PACKAGE_NAME $USER_FUNCTION_NAME\`,
+	Example:       \`  ccm2 $PACKAGE_NAME $USER_FUNCTION_NAME\`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -179,4 +179,4 @@ else
     echo "Command $USER_FUNCTION_NAME already exists at $NEW_CMD_PATH"
 fi
 
-echo "Done. Run 'go build -o ccm .' to compile."
+echo "Done. Run 'go build -o ccm2 .' to compile."

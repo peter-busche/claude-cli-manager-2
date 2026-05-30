@@ -1,4 +1,4 @@
-module github.com/peter-busche/claude-cli-manager
+module github.com/peter-busche/claude-cli-manager-2
 
 go 1.21
 

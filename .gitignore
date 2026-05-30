@@ -2,8 +2,8 @@
 .DS_Store
 .idea
 build/
-ccm
-claude-cli-manager
+ccm2
+claude-cli-manager-2
 .env
 .env.local
 temp.md

@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/peter-busche/claude-cli-manager/cmd/hello"
-	"github.com/peter-busche/claude-cli-manager/internal/lib"
+	"github.com/peter-busche/claude-cli-manager-2/cmd/hello"
+	"github.com/peter-busche/claude-cli-manager-2/internal/lib"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -14,13 +14,13 @@ import (
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:   "ccm",
-	Short: "claude-cli-manager — a CLI to manage your Claude tooling",
-	Long: `claude-cli-manager (ccm) is the one stop shop for managing your Claude tooling.
-Commands follow the format 'ccm <object> <command> <flags>'.
+	Use:   "ccm2",
+	Short: "claude-cli-manager-2 — a CLI to manage your Claude tooling",
+	Long: `claude-cli-manager-2 (ccm2) is the one stop shop for managing your Claude tooling.
+Commands follow the format 'ccm2 <object> <command> <flags>'.
 Explore by passing the -h flag to any object or command to see its help text!
 `,
-	Example:       `  ccm --version`,
+	Example:       `  ccm2 --version`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -108,7 +108,7 @@ func Execute(version string) {
 }
 
 // initConfig sets up Viper to read an optional config file at
-// ~/.config/ccm/config.yaml. A missing config file is not an error — commands
+// ~/.config/ccm2/config.yaml. A missing config file is not an error — commands
 // that need specific values should validate them when they run.
 func initConfig() error {
 	home, err := os.UserHomeDir()
@@ -116,10 +116,10 @@ func initConfig() error {
 		return fmt.Errorf("trouble finding user's home directory: %w", err)
 	}
 
-	viper.AddConfigPath(fmt.Sprintf("%s/.config/ccm", home))
+	viper.AddConfigPath(fmt.Sprintf("%s/.config/ccm2", home))
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
-	viper.SetEnvPrefix("ccm")
+	viper.SetEnvPrefix("ccm2")
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
