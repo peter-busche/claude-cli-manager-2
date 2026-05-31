@@ -8,3 +8,5 @@ session_app = typer.Typer(
 
 # Subcommand imports are appended here by scripts/add_cmd.py:
 from ccm2.commands.session import list  # noqa: F401
+from ccm2.commands.session import create  # noqa: F401
+from ccm2.commands.session import prompt  # noqa: F401

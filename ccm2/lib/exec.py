@@ -21,3 +21,15 @@ def execute_command_live(command: str) -> int:
         stderr=sys.stderr,
     )
     return result.returncode
+
+
+def run_interactive(name: str, *args: str, cwd: str | None = None) -> int:
+    """Launch an external binary with the terminal attached (stdin/stdout/stderr inherited)."""
+    result = subprocess.run(
+        [name, *args],
+        stdin=sys.stdin,
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+        cwd=cwd,
+    )
+    return result.returncode
