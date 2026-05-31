@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ccm2"
+version = "0.1.0"
+description = "claude-cli-manager-2 — a CLI to manage your Claude tooling"
+requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+    "pyyaml>=6.0",
+    "claude-code-sdk>=0.0.10",
+]
+
+[project.scripts]
+ccm2 = "ccm2.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ccm2"]
