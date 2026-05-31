@@ -8,3 +8,4 @@ startup_app = typer.Typer(
 
 # Subcommand imports are appended here by scripts/add_cmd.py:
 from ccm2.commands.startup import init  # noqa: F401
+from ccm2.commands.startup import bootstrap  # noqa: F401
