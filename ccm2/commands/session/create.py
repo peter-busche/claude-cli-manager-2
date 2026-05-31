@@ -94,6 +94,7 @@ def _create_sub_agent() -> None:
         _build_agent_gen_prompt(description),
         "--dangerously-skip-permissions",
         cwd=cwd,
+        close_stdin=True,
     )
     if rc != 0:
         typer.echo(red("Failed to generate sub-agent."), err=True)

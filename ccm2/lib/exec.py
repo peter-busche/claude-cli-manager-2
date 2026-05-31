@@ -23,11 +23,17 @@ def execute_command_live(command: str) -> int:
     return result.returncode
 
 
-def run_interactive(name: str, *args: str, cwd: str | None = None) -> int:
-    """Launch an external binary with the terminal attached (stdin/stdout/stderr inherited)."""
+def run_interactive(
+    name: str, *args: str, cwd: str | None = None, close_stdin: bool = False
+) -> int:
+    """Launch an external binary with the terminal attached (stdin/stdout/stderr inherited).
+
+    Set close_stdin=True for headless runs (e.g. `claude -p`) that take their input
+    from argv and would otherwise block waiting on stdin.
+    """
     result = subprocess.run(
         [name, *args],
-        stdin=sys.stdin,
+        stdin=subprocess.DEVNULL if close_stdin else sys.stdin,
         stdout=sys.stdout,
         stderr=sys.stderr,
         cwd=cwd,
