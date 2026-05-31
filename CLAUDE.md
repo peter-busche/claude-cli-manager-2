@@ -3,6 +3,11 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with
 code in this repository.
 
+## Workflow
+
+- **Never use worktrees.** Make all changes directly on the current branch (`main`).
+- The user reviews changes locally before pushing.
+
 ## Build and Development Commands
 
 - **Install (editable)**: `pip install -e .` — installs `ccm2` as a CLI command in your active virtualenv
