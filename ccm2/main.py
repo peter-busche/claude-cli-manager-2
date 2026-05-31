@@ -41,6 +41,8 @@ def root(
 
 
 # --- OBJECT COMMANDS (add new sub-apps here) ---
+from ccm2.commands.session import session_app
+app.add_typer(session_app, name="session")
 
 
 # --- ROOT COMMANDS ---
