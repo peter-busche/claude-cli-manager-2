@@ -18,36 +18,79 @@ class ListOptions:
     repo_dir: Path
     sessions_dir: Path
     projects_dir: Path
+    show_all: bool
 
 
-def _build(options: ListOptions, dir: str) -> None:
+def _build(options: ListOptions, dir: str, show_all: bool) -> None:
     options.repo_dir = Path(dir).resolve()
     home = Path.home()
     options.sessions_dir = home / ".claude" / "sessions"
     options.projects_dir = home / ".claude" / "projects"
+    options.show_all = show_all
 
 
 def _run(options: ListOptions) -> None:
-    if not options.sessions_dir.exists():
+    if not options.sessions_dir.exists() and not options.show_all:
         typer.echo("No Claude sessions directory found")
         return
 
     typer.echo(f"\n{white(f'Claude Sessions for: {options.repo_dir}')}\n")
 
-    session_count = 0
-    for session_file in sorted(options.sessions_dir.glob("*.json")):
-        meta = _read_session_meta(session_file)
-        if meta is None:
-            continue
-        if meta.get("cwd") != str(options.repo_dir):
-            continue
-        session_count += 1
-        _print_session(options, meta, session_count)
+    # Collect live sessions first (those with a metadata file in ~/.claude/sessions),
+    # then — with --all — fold in completed sessions discovered from their persisted
+    # transcripts in ~/.claude/projects. Live status wins on any session ID overlap.
+    records: list[dict] = []
+    seen: set[str] = set()
 
-    if session_count == 0:
+    if options.sessions_dir.exists():
+        for session_file in sorted(options.sessions_dir.glob("*.json")):
+            meta = _read_session_meta(session_file)
+            if meta is None or meta.get("cwd") != str(options.repo_dir):
+                continue
+            sid = meta.get("sessionId")
+            if sid:
+                seen.add(sid)
+            records.append(meta)
+
+    if options.show_all:
+        records.extend(_persisted_sessions(options, seen))
+
+    for i, meta in enumerate(records, 1):
+        _print_session(options, meta, i)
+
+    if not records:
         typer.echo(red(f"No Claude sessions found for: {options.repo_dir}"))
     else:
-        typer.echo(white(f"Total Sessions: {session_count}"))
+        typer.echo(white(f"Total Sessions: {len(records)}"))
+
+
+def _persisted_sessions(options: ListOptions, seen: set[str]) -> list[dict]:
+    """Synthesize session records from persisted transcripts not already live.
+
+    Each ~/.claude/projects/<encoded-cwd>/<sessionID>.jsonl is a session that ran
+    in this cwd. Completed headless runs have no live metadata file, so this is the
+    only way to surface them (and their sub-agents) after they exit.
+    """
+    proj = options.projects_dir / _encode_path(str(options.repo_dir))
+    if not proj.exists():
+        return []
+
+    transcripts = sorted(proj.glob("*.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True)
+    out: list[dict] = []
+    for transcript in transcripts:
+        sid = transcript.stem
+        if sid in seen:
+            continue
+        seen.add(sid)
+        out.append(
+            {
+                "sessionId": sid,
+                "cwd": str(options.repo_dir),
+                "status": "completed",
+                "updatedAt": 0,
+            }
+        )
+    return out
 
 
 def _print_session(options: ListOptions, meta: dict, num: int) -> None:
@@ -225,8 +268,22 @@ def list_command(
         "-d",
         help=flag_string(FlagPriority.OPTIONAL, "Repository directory to inspect", "", "."),
     ),
+    show_all: bool = typer.Option(
+        False,
+        "--all",
+        "-a",
+        help=flag_string(
+            FlagPriority.OPTIONAL,
+            "Include completed sessions (from persisted transcripts), not just live ones",
+        ),
+    ),
 ) -> None:
-    """List Claude Code sessions and sub-agents for a repository."""
+    """List Claude Code sessions and sub-agents for a repository.
+
+    By default only live sessions (those with a process metadata file) are shown.
+    Use --all to also surface completed sessions and their sub-agents from
+    persisted transcripts in ~/.claude/projects.
+    """
     options = ListOptions()
-    _build(options, dir)
+    _build(options, dir, show_all)
     _run(options)

@@ -96,6 +96,22 @@ def _scaffold(target: str, template: str) -> None:
     typer.echo(f"\n  1. Edit {cyan(_PROMPT_FILE)} — set the frontmatter and write your prompt.")
     typer.echo(f"  2. Run it with: {cyan('ccm2 session prompt --run')}")
 
+    _open_file(dest)
+
+
+def _open_file(path: Path) -> None:
+    """Open a file in the OS default app (best effort; never fails the command)."""
+    import platform
+    import subprocess
+
+    opener = {"Darwin": "open", "Linux": "xdg-open"}.get(platform.system())
+    if not opener:
+        return
+    try:
+        subprocess.run([opener, str(path)], check=False)
+    except OSError:
+        pass
+
 
 def _run_prompt_file() -> None:
     """Parse prompt.md in the current folder, run it, then delete it."""
