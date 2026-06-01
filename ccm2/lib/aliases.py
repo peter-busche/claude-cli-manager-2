@@ -6,6 +6,11 @@ def _path() -> Path:
     return Path.home() / ".config" / "ccm2" / "aliases.json"
 
 
+def path() -> Path:
+    """Absolute path to the global alias store file."""
+    return _path()
+
+
 def load() -> dict:
     p = _path()
     if not p.exists():
@@ -22,10 +27,12 @@ def save(store: dict) -> None:
     p.write_text(json.dumps(store, indent=2) + "\n")
 
 
-def set_alias(name: str, session_id: str, cwd: str, created_at_ms: int) -> None:
+def set_alias(
+    name: str, session_id: str, cwd: str, created_at_ms: int, overwrite: bool = False
+) -> None:
     store = load()
     existing = store.get(name)
-    if existing and existing.get("sessionId") != session_id:
+    if existing and existing.get("sessionId") != session_id and not overwrite:
         raise ValueError(
             f"alias '{name}' already points to session {existing['sessionId']}; "
             "delete it first before reassigning"

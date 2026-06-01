@@ -1,5 +1,6 @@
 import json
 import subprocess
+import time
 import uuid
 from pathlib import Path
 
@@ -7,6 +8,7 @@ import typer
 import yaml
 
 from ccm2.commands.startup import startup_app
+from ccm2.lib import aliases
 from ccm2.lib.colors import blue, cyan, green, red, white, yellow
 from ccm2.lib.exec import run_interactive
 from ccm2.lib.flags import FlagErrors, FlagPriority, check_enum, flag_string
@@ -212,6 +214,7 @@ def _run_execute(options: InitOptions) -> None:
     typer.echo(f"\n{white(f'Generating CLAUDE.md files in: {root}')}\n")
 
     tally = {"created": 0, "skipped": 0, "failed": 0}
+    aliased: list[tuple[str, str]] = []  # (alias, session-id)
     for label, target_dir, template_name in targets:
         target_dir = target_dir.resolve()
         if not target_dir.is_dir():
@@ -236,10 +239,17 @@ def _run_execute(options: InitOptions) -> None:
                 "size budget above."
             )
 
+        # Alias the session with the relative path it ran in (e.g. "ccm2/commands"),
+        # so it can later be driven by name with `ccm2 session prompt <alias>`. We
+        # register the alias up front and overwrite any stale one so a --force refresh
+        # repoints the alias at the freshly generated session.
+        session_id = str(uuid.uuid4())
+        _register_alias(label, session_id, str(target_dir), aliased)
+
         typer.echo(yellow(f"  {'refreshing' if exists else 'creating'} {label}/CLAUDE.md ..."))
         rc = run_interactive(
             "claude",
-            "--session-id", str(uuid.uuid4()),
+            "--session-id", session_id,
             "-p", prompt,
             "--model", options.model,
             "--permission-mode", options.permission_mode,
@@ -261,10 +271,59 @@ def _run_execute(options: InitOptions) -> None:
         f"{yellow(str(tally['skipped']) + ' skipped')}, "
         f"{red(str(tally['failed']) + ' failed')}."
     )
+    if aliased:
+        typer.echo(f"\n{blue('Sessions aliased by folder')} (drive them with "
+                   f"{cyan('ccm2 session prompt <alias>')}):")
+        for alias, session_id in aliased:
+            typer.echo(f"    - {green(alias)}  ->  {session_id}")
+    _link_aliases_file(root)
     typer.echo(
         "\nTo get the context-narrowing benefit: start future sessions INSIDE these subfolders, "
         "and keep the root CLAUDE.md lean."
     )
+
+
+def _register_alias(
+    label: str, session_id: str, cwd: str, aliased: list[tuple[str, str]]
+) -> None:
+    """Record a folder's generation session under its relative-path alias (best effort).
+
+    Overwrites any existing alias of the same name so re-running --execute repoints it
+    at the new session rather than failing on the stale one.
+    """
+    try:
+        aliases.set_alias(label, session_id, cwd, _now_ms(), overwrite=True)
+        aliased.append((label, session_id))
+    except ValueError as exc:
+        typer.echo(yellow(f"  could not alias {label}: {exc}"))
+
+
+def _link_aliases_file(root: Path) -> None:
+    """Symlink .claude/init/aliases.json -> the global ccm2 alias store.
+
+    Gives the repo an at-a-glance view of every session aliased here. Best effort:
+    a pre-existing real file is left untouched, and a stale symlink is repointed.
+    """
+    target = aliases.path().resolve()
+    link = root / ".claude" / "init" / "aliases.json"
+    link.parent.mkdir(parents=True, exist_ok=True)
+
+    if link.is_symlink():
+        try:
+            if link.resolve() == target:
+                return  # already linked correctly
+        except OSError:
+            pass
+        link.unlink()  # stale/broken/wrong symlink — replace it
+    elif link.exists():
+        typer.echo(yellow(f"  {link} exists and is not a symlink; leaving it untouched."))
+        return
+
+    try:
+        link.symlink_to(target)
+        typer.echo(green(f"  Linked {link} -> {target}"))
+    except OSError as exc:
+        typer.echo(yellow(f"  Could not link aliases file: {exc}"))
 
 
 def _read_template(root: Path, name: str) -> str:
@@ -312,6 +371,10 @@ def _apply_excludes(options: InitOptions, excludes: list) -> None:
 
 def _humanize(n: int) -> str:
     return f"{n:,}"
+
+
+def _now_ms() -> int:
+    return int(time.time() * 1000)
 
 
 @startup_app.command("init")
