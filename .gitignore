@@ -7,7 +7,6 @@ temp.md
 temp.txt
 *.swp
 *.swo
-*.claude
 
 # Python
 __pycache__/
@@ -24,3 +23,4 @@ env/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+docs
